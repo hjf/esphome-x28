@@ -1,0 +1,69 @@
+esphome:
+  name: alarma-x28
+  includes:
+    - alarma-x28/x28.h
+
+custom_component:
+  - lambda: |-
+      auto alarma_x28 = new AlarmaX28();
+      return {alarma_x28};
+    components:
+      - id: alarma_x28_id
+
+button:
+  - platform: template
+    name: PANICO
+    id: panic_button
+    on_press:
+      - lambda: |-
+          ((AlarmaX28*)id(alarma_x28_id))->sendPanic();
+
+switch:
+  - platform: custom
+    lambda: |-
+      auto x28_activada = new X28Activada();
+      App.register_component(x28_activada);
+      return {x28_activada};
+
+    switches:
+      name: "Alarma Activada"
+      id: x28_activada
+
+  - platform: custom
+    lambda: |-
+      auto x28_estoy = new X28Estoy();
+      App.register_component(x28_estoy);
+      return {x28_estoy};
+
+    switches:
+      name: "Estoy"
+      id: x28_estoy
+
+esp32:
+  board: nodemcu-32s
+
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret apiencryptionkey
+
+ota:
+  password: !secret apikey
+
+wifi:
+  ssid: !secret devices-ssid
+  password: !secret devices-password
+  fast_connect: false
+  power_save_mode: light
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "ALARMA"
+    password: "w1iEbzypTowm"
+
+captive_portal:
+
+web_server:
+  port: 80
